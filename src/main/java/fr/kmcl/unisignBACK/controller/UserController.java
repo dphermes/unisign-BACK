@@ -35,7 +35,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
  * @since 01/10/2022
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
