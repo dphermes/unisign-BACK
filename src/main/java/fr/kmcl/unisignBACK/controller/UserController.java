@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -42,28 +43,33 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users")
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<List<AppUser>> getUsers() {
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
     @GetMapping(path = "/user/{username}")
+    @PreAuthorize("hasAuthority('user:read')")
     public AppUser getUser(@PathVariable("username") String username) {
         return userService.getUser(username);
     }
 
     @PostMapping("/user/save")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AppUser> saveUser(@RequestBody AppUser user) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/user/save").toUriString());
         return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
 
     @PostMapping("/role/save")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AppRole> saveRole(@RequestBody AppRole role) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/role/save").toUriString());
         return ResponseEntity.created(uri).body(userService.saveRole(role));
     }
 
     @PostMapping("/role/addtouser")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> addRoleToUser(@RequestBody RoleToUserForm form) {
         userService.addRoleToUser(form.getUsername(), form.getRoleName());
         return ResponseEntity.ok().build();
