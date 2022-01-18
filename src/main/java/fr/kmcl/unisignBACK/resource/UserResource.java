@@ -1,4 +1,4 @@
-package fr.kmcl.unisignBACK.controller;
+package fr.kmcl.unisignBACK.resource;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -39,7 +39,8 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Slf4j
-public class UserController {
+public class UserResource {
+
     private final UserService userService;
 
     @GetMapping("/users")
@@ -89,7 +90,7 @@ public class UserController {
                 String accessToken = JWT.create()
                         .withSubject(user.getUsername())
                         .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
-                        .withIssuer(request.getRequestURI().toString())
+                        .withIssuer(request.getRequestURI())
                         .withClaim("roles", user.getRoles().stream().map(AppRole::getName).collect(Collectors.toList()))
                         .sign(algorithm);
                 Map<String, String> tokens = new HashMap<>();
@@ -99,9 +100,8 @@ public class UserController {
                 new ObjectMapper().writeValue(response.getOutputStream(), tokens);
             } catch (Exception e) {
                 log.error("Error logging in: {}", e.getMessage());
-                response.setHeader("error", e.getMessage());
+                response.setHeader("Error", e.getMessage());
                 response.setStatus(FORBIDDEN.value());
-                // response.sendError(FORBIDDEN.value());
                 Map<String, String> error = new HashMap<>();
                 error.put("error_message", e.getMessage());
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);

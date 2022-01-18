@@ -1,8 +1,6 @@
 package fr.kmcl.unisignBACK.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -16,7 +14,8 @@ import java.util.Date;
  * @since 01/10/2022
  */
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppUser implements Serializable {

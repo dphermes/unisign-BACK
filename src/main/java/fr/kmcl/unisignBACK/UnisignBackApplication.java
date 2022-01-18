@@ -8,16 +8,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static fr.kmcl.unisignBACK.security.AppUserRole.*;
-
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.stream.Stream;
+
+import static fr.kmcl.unisignBACK.security.AppUserRole.*;
 
 @SpringBootApplication
 public class UnisignBackApplication {

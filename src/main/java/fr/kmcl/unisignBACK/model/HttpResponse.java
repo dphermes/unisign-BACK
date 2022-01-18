@@ -1,7 +1,8 @@
 package fr.kmcl.unisignBACK.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -9,7 +10,8 @@ import org.springframework.http.HttpStatus;
  * @version 1.0
  * @since 01/10/2022
  */
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class HttpResponse {
     private int httpStatusCode;
