@@ -15,7 +15,7 @@ public interface UserService {
     AppRole saveRole(AppRole role);
     void addRoleToUser(String username, String roleName);
     AppUser getUser(String username);
-    /** Assuming there's not a lot of users using this application
-     Otherwise return a page instead of all users **/
+    /* Assuming there's not a lot of users using this application
+     Otherwise return a page instead of all users */
     List<AppUser> getUsers();
 }

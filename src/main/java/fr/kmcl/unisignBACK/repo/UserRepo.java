@@ -9,5 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @since 01/10/2022
  */
 public interface UserRepo extends JpaRepository<AppUser, Long> {
-    AppUser findByUsername(String username);
+    AppUser findAppUserByUsername(String username);
+    AppUser findAppUserByEmail(String email);
 }
