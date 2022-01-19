@@ -1,7 +1,7 @@
 package fr.kmcl.unisignBACK.security;
 
-import fr.kmcl.unisignBACK.filter.CustomAuthenticationFilter;
-import fr.kmcl.unisignBACK.filter.CustomAuthorizationFilter;
+import fr.kmcl.unisignBACK.filter.*;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,34 +25,49 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  */
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+@AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private JwtAuthorizationFilter jwtAuthorizationFilter;
+    private JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    /**
+     * Hash password for security matter
+     * @param auth: AuthenticationManagerBuilder
+     * @throws Exception: exception
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
     }
 
+    /**
+     * Configure everything we want Spring Security to manage
+     * @param http HttpSecurity
+     * @throws Exception: exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable().cors()
+                .and().sessionManagement().sessionCreationPolicy(STATELESS)
+                .and().authorizeRequests().antMatchers(PUBLIC_URLS).permitAll()
+                .anyRequest().authenticated()
+                .and().exceptionHandling().accessDeniedHandler(jwtAccessDeniedHandler)
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .and().addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         // Customize login url to match our api
+        // @TODO: Configure it a bit differently to get rid of CustomAuthenticationFilter later on
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
         customAuthenticationFilter.setFilterProcessesUrl("/api/v1/login");
-        // http.csrf().disable();
-        http.sessionManagement().sessionCreationPolicy(STATELESS);
-        http.authorizeRequests().antMatchers(PUBLIC_URLS).permitAll();
-        http.authorizeRequests().anyRequest().authenticated();
-        http.addFilter(customAuthenticationFilter);
-        http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
     @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
+    public AuthenticationManager authenticationManager() throws Exception {
         return super.authenticationManagerBean();
     }
 }

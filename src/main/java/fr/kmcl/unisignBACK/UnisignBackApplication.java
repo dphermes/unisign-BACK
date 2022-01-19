@@ -24,7 +24,7 @@ public class UnisignBackApplication {
 	}
 
 	@Bean
-	PasswordEncoder passwordEncoder() {
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
