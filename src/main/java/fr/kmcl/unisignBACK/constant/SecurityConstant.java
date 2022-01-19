@@ -13,8 +13,8 @@ public class SecurityConstant {
     public static final String KMCL_SAS = "Konica Minolta Centre Loire, SAS";
     public static final String KMCL_ADMINISTRATION = "Signature management portal";
     public static final String AUTHORITIES = "Authorities";
-    public static final String FORBIDDEN_MESSAGE = "You need to log in to access";
-    public static final String ACCESS_DENIED_MESSAGE = "You do not have permission to access";
+    public static final String FORBIDDEN_MESSAGE = "You Shall Not Pass! You need to log in to access it.";
+    public static final String ACCESS_DENIED_MESSAGE = "You Shall Not Pass! You do not have permission.";
     public static final String OPTIONS_HTTP_METHOD = "OPTIONS";
     public static final String[] PUBLIC_URLS = {
             "/api/v1/login",
