@@ -23,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.Date;
 import java.util.List;
 
+import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
 import static fr.kmcl.unisignBACK.security.Role.ROLE_USER;
 
 /**
@@ -50,14 +51,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         AppUser user = userRepo.findAppUserByUsername(username);
         if(user == null) {
-            log.error("User not found in the database");
-            throw new UsernameNotFoundException("User not found in the database");
+            log.error(NO_USER_FOUND_WITH_USERNAME);
+            throw new UsernameNotFoundException(NO_USER_FOUND_WITH_USERNAME);
         } else {
             user.setLastLoginDateDisplay(user.getLastLoginDate());
             user.setLastLoginDate(new Date());
             userRepo.save(user);
             UserPrincipal userPrincipal = new UserPrincipal(user);
-            log.info("User {} found in the database", username);
+            log.info(USER_FOUND_IN_DB, username);
             return userPrincipal;
         }
     }
@@ -69,7 +70,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      */
     @Override
     public AppUser saveUser(AppUser user) {
-        log.info("Saving user {} to the database", user.getUsername());
+        log.info(SAVING_USER_TO_DB, user.getUsername());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepo.save(user);
     }
@@ -94,11 +95,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setProfileImageUrl(getTemporaryProfileUrl());
         userRepo.save(user);
         log.info("New user password: " + password);
-        return null;
+        return user;
     }
 
     private String getTemporaryProfileUrl() {
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/image/profile/temp").toUriString();
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path(DEFAULT_USER_IMAGE_PATH).toUriString();
     }
 
     private String encodePassword(String password) {
@@ -114,28 +115,26 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     private AppUser validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistException, EmailExistException {
+        AppUser userByUsername = findUserByUsername(newUsername);
+        AppUser userByEmail = findUserByEmail(newEmail);
         if (StringUtils.isNotBlank(currentUsername)) {
             AppUser currentUser = findUserByUsername(currentUsername);
             if (currentUser == null) {
-                throw new UserNotFoundException("No user found with username " + currentUsername);
+                throw new UserNotFoundException(NO_USER_FOUND_WITH_USERNAME + currentUsername);
             }
-            AppUser userByNewUsername = findUserByUsername(newUsername);
-            if (userByNewUsername != null && currentUser.getId().equals(userByNewUsername.getId())) {
-                throw new UsernameExistException("This username already exists");
+            if (userByUsername != null && currentUser.getId().equals(userByUsername.getId())) {
+                throw new UsernameExistException(USERNAME_ALREADY_EXISTS);
             }
-            AppUser userByNewEmail = findUserByEmail(newEmail);
-            if (userByNewEmail != null && currentUser.getId().equals(userByNewEmail.getId())) {
-                throw new EmailExistException("This email already exists");
+            if (userByEmail != null && currentUser.getId().equals(userByEmail.getId())) {
+                throw new EmailExistException(EMAIL_ALREADY_EXISTS);
             }
             return currentUser;
         } else {
-            AppUser userByUsername = findUserByUsername(newUsername);
             if (userByUsername != null) {
-                throw new UsernameExistException("This username already exists");
+                throw new UsernameExistException(USERNAME_ALREADY_EXISTS);
             }
-            AppUser userByEmail = findUserByEmail(newEmail);
             if (userByEmail != null) {
-                throw new EmailExistException("This email already exists");
+                throw new EmailExistException(EMAIL_ALREADY_EXISTS);
             }
             return null;
         }
@@ -148,7 +147,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      */
     @Override
     public AppUser findUserByUsername(String username) {
-        log.info("Fetching user {}", username);
         return userRepo.findAppUserByUsername(username);
     }
 
@@ -159,7 +157,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      */
     @Override
     public AppUser findUserByEmail(String username) {
-        log.info("Fetching user {}", username);
         return userRepo.findAppUserByUsername(username);
     }
 
@@ -171,7 +168,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public List<AppUser> getUsers() {
         /* Assuming there's not a lot of users using this application
         ** Otherwise return a page instead of all users */
-        log.info("Fetching all users");
         return userRepo.findAll();
     }
 }
