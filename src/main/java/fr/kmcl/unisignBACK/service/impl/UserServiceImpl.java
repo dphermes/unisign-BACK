@@ -152,12 +152,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * Fetch a user from the database by his username
-     * @param username String: user's username
+     * @param email String: user's username
      * @return AppUser: user fetched from DB
      */
     @Override
-    public AppUser findUserByEmail(String username) {
-        return userRepo.findAppUserByUsername(username);
+    public AppUser findUserByEmail(String email) {
+        return userRepo.findAppUserByEmail(email);
     }
 
     /**
