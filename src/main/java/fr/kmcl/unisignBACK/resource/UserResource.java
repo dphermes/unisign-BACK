@@ -5,14 +5,16 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.kmcl.unisignBACK.exception.model.EmailExistException;
 import fr.kmcl.unisignBACK.exception.model.ExceptionHandlerGnrl;
 import fr.kmcl.unisignBACK.exception.model.UserNotFoundException;
-import fr.kmcl.unisignBACK.model.AppRole;
+import fr.kmcl.unisignBACK.exception.model.UsernameExistException;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.service.UserService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
@@ -38,7 +39,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
  * @since 01/10/2022
  */
 @RestController
-@RequestMapping(path = {"/", "/api/v1"})
+@RequestMapping(path = {"/", "/api/v1/user"})
 @RequiredArgsConstructor
 @Slf4j
 public class UserResource extends ExceptionHandlerGnrl {
@@ -50,16 +51,22 @@ public class UserResource extends ExceptionHandlerGnrl {
         throw new UserNotFoundException("This user was not found");
     }
 
-    @GetMapping("/users")
+    @GetMapping("/all")
     @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<List<AppUser>> getUsers() {
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
-    @GetMapping(path = "/user/{username}")
+    @GetMapping(path = "/{username}")
     @PreAuthorize("hasAuthority('user:read')")
     public AppUser getUser(@PathVariable("username") String username) {
-        return userService.getUser(username);
+        return userService.findUserByUsername(username);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<AppUser> registerUser(@RequestBody AppUser user) throws UserNotFoundException, EmailExistException, UsernameExistException {
+        AppUser newUser = userService.registerUser(user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail());
+        return new ResponseEntity<>(newUser, HttpStatus.OK);
     }
 
     @PostMapping("/user/save")
@@ -67,20 +74,6 @@ public class UserResource extends ExceptionHandlerGnrl {
     public ResponseEntity<AppUser> saveUser(@RequestBody AppUser user) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/user/save").toUriString());
         return ResponseEntity.created(uri).body(userService.saveUser(user));
-    }
-
-    @PostMapping("/role/save")
-    @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<AppRole> saveRole(@RequestBody AppRole role) {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/role/save").toUriString());
-        return ResponseEntity.created(uri).body(userService.saveRole(role));
-    }
-
-    @PostMapping("/role/addtouser")
-    @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<?> addRoleToUser(@RequestBody RoleToUserForm form) {
-        userService.addRoleToUser(form.getUsername(), form.getRoleName());
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/token/refresh")
@@ -93,12 +86,12 @@ public class UserResource extends ExceptionHandlerGnrl {
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(refreshToken);
                 String username = decodedJWT.getSubject();
-                AppUser user = userService.getUser(username);
+                AppUser user = userService.findUserByUsername(username);
                 String accessToken = JWT.create()
                         .withSubject(user.getUsername())
                         .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
                         .withIssuer(request.getRequestURI())
-                        .withClaim("roles", user.getRoles().stream().map(AppRole::getName).collect(Collectors.toList()))
+                        .withClaim("role", user.getRole())
                         .sign(algorithm);
                 Map<String, String> tokens = new HashMap<>();
                 tokens.put("access_token", accessToken);

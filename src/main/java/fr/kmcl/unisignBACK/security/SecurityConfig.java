@@ -1,8 +1,11 @@
 package fr.kmcl.unisignBACK.security;
 
-import fr.kmcl.unisignBACK.filter.*;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import fr.kmcl.unisignBACK.filter.CustomAuthenticationFilter;
+import fr.kmcl.unisignBACK.filter.JwtAccessDeniedHandler;
+import fr.kmcl.unisignBACK.filter.JwtAuthenticationEntryPoint;
+import fr.kmcl.unisignBACK.filter.JwtAuthorizationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,15 +28,28 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
  */
 @Configuration
 @EnableWebSecurity
-@AllArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private JwtAuthorizationFilter jwtAuthorizationFilter;
     private JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final UserDetailsService userDetailsService;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private UserDetailsService userDetailsService;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    public void SecurityConfiguration(JwtAuthorizationFilter jwtAuthorizationFilter,
+                                      JwtAccessDeniedHandler jwtAccessDeniedHandler,
+                                      JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                                      @Qualifier("userDetailsService")UserDetailsService userDetailsService,
+                                      BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
+        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.userDetailsService = userDetailsService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
+
 
     /**
      * Hash password for security matter
@@ -67,7 +83,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     @Override
-    public AuthenticationManager authenticationManager() throws Exception {
+    public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 }
