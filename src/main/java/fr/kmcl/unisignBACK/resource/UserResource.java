@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.kmcl.unisignBACK.exception.model.ExceptionHandlerGnrl;
 import fr.kmcl.unisignBACK.model.AppRole;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.service.UserService;
@@ -39,7 +40,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Slf4j
-public class UserResource {
+public class UserResource extends ExceptionHandlerGnrl {
 
     private final UserService userService;
 
