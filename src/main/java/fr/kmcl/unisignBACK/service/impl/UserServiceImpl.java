@@ -35,7 +35,7 @@ import static fr.kmcl.unisignBACK.security.Role.ROLE_USER;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
-@Qualifier("UserServiceDetails")
+@Qualifier("userDetailsService")
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepo userRepo;
