@@ -5,7 +5,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.kmcl.unisignBACK.exception.model.EmailExistException;
 import fr.kmcl.unisignBACK.exception.model.ExceptionHandlerGnrl;
 import fr.kmcl.unisignBACK.exception.model.UserNotFoundException;
 import fr.kmcl.unisignBACK.model.AppRole;
@@ -39,7 +38,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
  * @since 01/10/2022
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping(path = {"/", "/api/v1"})
 @RequiredArgsConstructor
 @Slf4j
 public class UserResource extends ExceptionHandlerGnrl {
