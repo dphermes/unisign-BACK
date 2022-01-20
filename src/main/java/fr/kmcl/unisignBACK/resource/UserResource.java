@@ -5,7 +5,9 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.kmcl.unisignBACK.exception.model.EmailExistException;
 import fr.kmcl.unisignBACK.exception.model.ExceptionHandlerGnrl;
+import fr.kmcl.unisignBACK.exception.model.UserNotFoundException;
 import fr.kmcl.unisignBACK.model.AppRole;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.service.UserService;
@@ -43,6 +45,11 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 public class UserResource extends ExceptionHandlerGnrl {
 
     private final UserService userService;
+
+    @GetMapping("/errorTesting")
+    public String showError() throws UserNotFoundException {
+        throw new UserNotFoundException("This user was not found");
+    }
 
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('user:read')")
