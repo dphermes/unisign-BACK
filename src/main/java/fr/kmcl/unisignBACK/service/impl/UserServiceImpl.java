@@ -1,27 +1,29 @@
 package fr.kmcl.unisignBACK.service.impl;
 
-import fr.kmcl.unisignBACK.model.AppRole;
+import fr.kmcl.unisignBACK.exception.model.EmailExistException;
+import fr.kmcl.unisignBACK.exception.model.UserNotFoundException;
+import fr.kmcl.unisignBACK.exception.model.UsernameExistException;
 import fr.kmcl.unisignBACK.model.AppUser;
-import fr.kmcl.unisignBACK.repo.RoleRepo;
 import fr.kmcl.unisignBACK.repo.UserRepo;
 import fr.kmcl.unisignBACK.security.UserPrincipal;
 import fr.kmcl.unisignBACK.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import static fr.kmcl.unisignBACK.security.Role.ROLE_USER;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -36,8 +38,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepo userRepo;
-    private final RoleRepo roleRepo;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     /**
      * Override loadUserByUsername method from UserDetailsService for Spring Security
@@ -73,28 +74,71 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepo.save(user);
     }
 
-    /**
-     * Save Role in the database
-     * @param role AppRole: role to save in DB
-     * @return saved role
-     */
     @Override
-    public AppRole saveRole(AppRole role) {
-        log.info("Saving role {} to the database", role.getName());
-        return roleRepo.save(role);
+    public AppUser registerUser(String firstName, String lastName, String username, String email) throws UserNotFoundException, EmailExistException, UsernameExistException {
+        validateNewUsernameAndEmail(StringUtils.EMPTY, username, email);
+        AppUser user = new AppUser();
+        user.setUserId(generateUserId());
+        String password = generatePassword();
+        String encodedPassword = encodePassword(password);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setJoinDate(new Date());
+        user.setPassword(encodedPassword);
+        user.setActive(true);
+        user.setNotLocked(true);
+        user.setRole(ROLE_USER.name());
+        user.setAuthorities(ROLE_USER.getAuthorities());
+        user.setProfileImageUrl(getTemporaryProfileUrl());
+        userRepo.save(user);
+        log.info("New user password: " + password);
+        return null;
     }
 
-    /**
-     * Save user and role connexion in the database
-     * @param username String: user's username
-     * @param roleName String: role name
-     */
-    @Override
-    public void addRoleToUser(String username, String roleName) {
-        log.info("Adding role {} to the user {} in the database", roleName, username);
-        AppUser user = userRepo.findAppUserByUsername(username);
-        AppRole role = roleRepo.findByName(roleName);
-        user.getRoles().add(role);
+    private String getTemporaryProfileUrl() {
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path("/user/image/profile/temp").toUriString();
+    }
+
+    private String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
+    private String generatePassword() {
+        return RandomStringUtils.randomAlphanumeric(12);
+    }
+
+    private String generateUserId() {
+        return RandomStringUtils.randomNumeric(10);
+    }
+
+    private AppUser validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistException, EmailExistException {
+        if (StringUtils.isNotBlank(currentUsername)) {
+            AppUser currentUser = findUserByUsername(currentUsername);
+            if (currentUser == null) {
+                throw new UserNotFoundException("No user found with username " + currentUsername);
+            }
+            AppUser userByNewUsername = findUserByUsername(newUsername);
+            if (userByNewUsername != null && currentUser.getId().equals(userByNewUsername.getId())) {
+                throw new UsernameExistException("This username already exists");
+            }
+            AppUser userByNewEmail = findUserByEmail(newEmail);
+            if (userByNewEmail != null && currentUser.getId().equals(userByNewEmail.getId())) {
+                throw new EmailExistException("This email already exists");
+            }
+            return currentUser;
+        } else {
+            AppUser userByUsername = findUserByUsername(newUsername);
+            if (userByUsername != null) {
+                throw new UsernameExistException("This username already exists");
+            }
+            AppUser userByEmail = findUserByEmail(newEmail);
+            if (userByEmail != null) {
+                throw new EmailExistException("This email already exists");
+            }
+            return null;
+        }
     }
 
     /**
@@ -103,7 +147,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return AppUser: user fetched from DB
      */
     @Override
-    public AppUser getUser(String username) {
+    public AppUser findUserByUsername(String username) {
+        log.info("Fetching user {}", username);
+        return userRepo.findAppUserByUsername(username);
+    }
+
+    /**
+     * Fetch a user from the database by his username
+     * @param username String: user's username
+     * @return AppUser: user fetched from DB
+     */
+    @Override
+    public AppUser findUserByEmail(String username) {
         log.info("Fetching user {}", username);
         return userRepo.findAppUserByUsername(username);
     }

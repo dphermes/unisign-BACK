@@ -4,8 +4,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -23,6 +21,7 @@ public class AppUser implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false, updatable = false)
     private Long id;
+    private String userId;
     private String firstName;
     private String lastName;
     private String username;
@@ -32,8 +31,7 @@ public class AppUser implements Serializable {
     private Date lastLoginDate;
     private Date lastLoginDateDisplay;
     private Date joinDate;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Collection<AppRole> roles = new ArrayList<>();
+    private String role;
     private String[] authorities;
     private boolean isActive;
     private boolean isNotLocked;
