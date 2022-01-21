@@ -1,6 +1,7 @@
 package fr.kmcl.unisignBACK.security.listener;
 
 import fr.kmcl.unisignBACK.model.AppUser;
+import fr.kmcl.unisignBACK.security.UserPrincipal;
 import fr.kmcl.unisignBACK.service.LoginAttemptService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class AuthenticationSuccessListener {
     @EventListener
     public void onAuthenticationSuccess(AuthenticationSuccessEvent event) {
         Object principal = event.getAuthentication().getPrincipal();
-        if (principal instanceof AppUser) {
-            AppUser user = (AppUser) event.getAuthentication().getPrincipal();
+        if (principal instanceof UserPrincipal) {
+            UserPrincipal user = (UserPrincipal) event.getAuthentication().getPrincipal();
             loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
         }
     }
