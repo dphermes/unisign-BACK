@@ -45,9 +45,13 @@ public class LoginAttemptService {
      * Add a user to the cache of Brute Force Attack Shield
      * @param username String: user's username
      */
-    public void addUserToLoginAttemptCache(String username) throws ExecutionException {
+    public void addUserToLoginAttemptCache(String username) {
         int attempts = 0;
-        attempts = loginAttemptCache.get(username) + ATTEMPT_INCREMENT;
+        try {
+            attempts = loginAttemptCache.get(username) + ATTEMPT_INCREMENT;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         loginAttemptCache.put(username, attempts);
     }
 
@@ -57,7 +61,12 @@ public class LoginAttemptService {
      * @return boolean: has this user exceeded max attempts
      * @throws ExecutionException: exception
      */
-    public boolean hasExceededMaxAttempts(String username) throws ExecutionException {
-        return loginAttemptCache.get(username) >= MAX_NUMBER_OF_ATTEMPTS;
+    public boolean hasExceededMaxAttempts(String username) {
+        try {
+            return loginAttemptCache.get(username) >= MAX_NUMBER_OF_ATTEMPTS;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
