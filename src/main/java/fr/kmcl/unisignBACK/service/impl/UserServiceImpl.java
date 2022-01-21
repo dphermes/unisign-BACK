@@ -6,11 +6,13 @@ import fr.kmcl.unisignBACK.exception.model.UsernameExistException;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.repo.UserRepo;
 import fr.kmcl.unisignBACK.security.UserPrincipal;
+import fr.kmcl.unisignBACK.service.LoginAttemptService;
 import fr.kmcl.unisignBACK.service.UserService;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,6 +24,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
 import static fr.kmcl.unisignBACK.security.Role.ROLE_USER;
@@ -33,13 +36,14 @@ import static fr.kmcl.unisignBACK.security.Role.ROLE_USER;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 @Qualifier("userDetailsService")
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepo userRepo;
     private final BCryptPasswordEncoder passwordEncoder;
+    private LoginAttemptService loginAttemptService;
 
     /**
      * Override loadUserByUsername method from UserDetailsService for Spring Security
@@ -54,12 +58,29 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             log.error(NO_USER_FOUND_WITH_USERNAME);
             throw new UsernameNotFoundException(NO_USER_FOUND_WITH_USERNAME);
         } else {
+            validateLoginAttempt(user);
             user.setLastLoginDateDisplay(user.getLastLoginDate());
             user.setLastLoginDate(new Date());
             userRepo.save(user);
             UserPrincipal userPrincipal = new UserPrincipal(user);
             log.info(USER_FOUND_IN_DB, username);
             return userPrincipal;
+        }
+    }
+
+    /**
+     * Checks if user max attempts exceeded and lock or unlock user's account accordingly
+     * @param user AppUser: user logging in
+     */
+    private void validateLoginAttempt(AppUser user) {
+        if (user.isNotLocked()) {
+            if(loginAttemptService.hasExceededMaxAttempts(user.getUsername())) {
+                user.setNotLocked(false);
+            } else {
+                user.setNotLocked(true);
+            }
+        } else {
+            loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
         }
     }
 
