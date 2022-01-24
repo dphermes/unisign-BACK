@@ -7,8 +7,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ExecutionException;
-
 /**
  * @author KMCL (https://www.kmcl.fr)
  * @version 1.0

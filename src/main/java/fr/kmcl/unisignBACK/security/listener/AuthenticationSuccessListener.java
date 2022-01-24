@@ -1,16 +1,12 @@
 package fr.kmcl.unisignBACK.security.listener;
 
-import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.security.UserPrincipal;
 import fr.kmcl.unisignBACK.service.LoginAttemptService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author KMCL (https://www.kmcl.fr)

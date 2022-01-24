@@ -3,6 +3,7 @@ package fr.kmcl.unisignBACK.service;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutionException;
@@ -18,7 +19,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 public class LoginAttemptService {
     private static final int MAX_NUMBER_OF_ATTEMPTS = 5;
     private static final int ATTEMPT_INCREMENT = 1;
-    private LoadingCache<String, Integer> loginAttemptCache;
+    private final LoadingCache<String, Integer> loginAttemptCache;
 
     /**
      * Initialize the Cache for Brute Force Attack Shield
@@ -26,8 +27,9 @@ public class LoginAttemptService {
     public LoginAttemptService() {
         super();
         loginAttemptCache = CacheBuilder.newBuilder().expireAfterWrite(15, MINUTES)
-                .maximumSize(100).build(new CacheLoader<String, Integer>() {
-                    public Integer load(String key) {
+                .maximumSize(100).build(new CacheLoader<>() {
+                    @NonNull
+                    public Integer load(@NonNull String key) {
                         return 0;
                     }
                 });
@@ -59,7 +61,6 @@ public class LoginAttemptService {
      * Checks if a user has exceeded the max number of attempts to log in
      * @param username String: user's username
      * @return boolean: has this user exceeded max attempts
-     * @throws ExecutionException: exception
      */
     public boolean hasExceededMaxAttempts(String username) {
         try {

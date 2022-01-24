@@ -24,7 +24,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
 import static fr.kmcl.unisignBACK.security.Role.ROLE_USER;
@@ -74,11 +73,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      */
     private void validateLoginAttempt(AppUser user) {
         if (user.isNotLocked()) {
-            if(loginAttemptService.hasExceededMaxAttempts(user.getUsername())) {
-                user.setNotLocked(false);
-            } else {
-                user.setNotLocked(true);
-            }
+            user.setNotLocked(!loginAttemptService.hasExceededMaxAttempts(user.getUsername()));
         } else {
             loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
         }

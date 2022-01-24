@@ -15,7 +15,6 @@ import fr.kmcl.unisignBACK.service.UserService;
 import fr.kmcl.unisignBACK.utility.JWTTokenProvider;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
