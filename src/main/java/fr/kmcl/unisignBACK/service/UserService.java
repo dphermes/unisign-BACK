@@ -4,6 +4,7 @@ import fr.kmcl.unisignBACK.exception.model.EmailExistException;
 import fr.kmcl.unisignBACK.exception.model.UserNotFoundException;
 import fr.kmcl.unisignBACK.exception.model.UsernameExistException;
 import fr.kmcl.unisignBACK.model.AppUser;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import java.util.List;
@@ -21,4 +22,9 @@ public interface UserService {
     /* Assuming there's not a lot of users using this application
      Otherwise return a page instead of all users */
     List<AppUser> getUsers();
+    AppUser addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage);
+    AppUser updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage);
+    void deleteUser(long id);
+    void resetPassword(String email);
+    AppUser updateProfileImage(String username, MultipartFile newProfileImage);
 }
