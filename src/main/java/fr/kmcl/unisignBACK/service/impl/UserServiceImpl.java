@@ -21,7 +21,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.mail.MessagingException;
@@ -189,30 +188,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         /* Assuming there's not a lot of users using this application
         ** Otherwise return a page instead of all users */
         return userRepo.findAll();
-    }
-
-    @Override
-    public AppUser addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) {
-        return null;
-    }
-
-    @Override
-    public AppUser updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) {
-        return null;
-    }
-
-    @Override
-    public void deleteUser(long id) {
-
-    }
-
-    @Override
-    public void resetPassword(String email) {
-
-    }
-
-    @Override
-    public AppUser updateProfileImage(String username, MultipartFile newProfileImage) {
-        return null;
     }
 }
