@@ -5,6 +5,7 @@ import fr.kmcl.unisignBACK.exception.model.UserNotFoundException;
 import fr.kmcl.unisignBACK.exception.model.UsernameExistException;
 import fr.kmcl.unisignBACK.model.AppUser;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public interface UserService {
     AppUser saveUser(AppUser user);
-    AppUser registerUser(String firstName, String lastName, String username, String email) throws UserNotFoundException, EmailExistException, UsernameExistException;
+    AppUser registerUser(String firstName, String lastName, String username, String email) throws UserNotFoundException, EmailExistException, UsernameExistException, MessagingException;
     AppUser findUserByUsername(String username);
     AppUser findUserByEmail(String email);
     /* Assuming there's not a lot of users using this application
