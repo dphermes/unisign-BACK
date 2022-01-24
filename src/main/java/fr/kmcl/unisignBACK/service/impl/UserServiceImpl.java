@@ -6,6 +6,7 @@ import fr.kmcl.unisignBACK.exception.model.UsernameExistException;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.repo.UserRepo;
 import fr.kmcl.unisignBACK.security.UserPrincipal;
+import fr.kmcl.unisignBACK.service.EmailService;
 import fr.kmcl.unisignBACK.service.LoginAttemptService;
 import fr.kmcl.unisignBACK.service.UserService;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.mail.MessagingException;
 import java.util.Date;
 import java.util.List;
 
@@ -43,6 +45,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepo userRepo;
     private final BCryptPasswordEncoder passwordEncoder;
     private LoginAttemptService loginAttemptService;
+    private EmailService emailService;
 
     /**
      * Override loadUserByUsername method from UserDetailsService for Spring Security
@@ -92,7 +95,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public AppUser registerUser(String firstName, String lastName, String username, String email) throws UserNotFoundException, EmailExistException, UsernameExistException {
+    public AppUser registerUser(String firstName, String lastName, String username, String email) throws UserNotFoundException, EmailExistException, UsernameExistException, MessagingException {
         validateNewUsernameAndEmail(StringUtils.EMPTY, username, email);
         AppUser user = new AppUser();
         user.setUserId(generateUserId());
@@ -110,7 +113,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setAuthorities(ROLE_USER.getAuthorities());
         user.setProfileImageUrl(getTemporaryProfileUrl());
         userRepo.save(user);
-        log.info("New user password: " + password);
+        emailService.sendNewPasswordEmail(firstName, password, email);
         return user;
     }
 

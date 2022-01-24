@@ -26,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -82,7 +83,7 @@ public class UserResource extends ExceptionHandlerGnrl {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AppUser> registerUser(@RequestBody AppUser user) throws UserNotFoundException, EmailExistException, UsernameExistException {
+    public ResponseEntity<AppUser> registerUser(@RequestBody AppUser user) throws UserNotFoundException, EmailExistException, UsernameExistException, MessagingException {
         AppUser newUser = userService.registerUser(user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail());
         return new ResponseEntity<>(newUser, HttpStatus.OK);
     }
