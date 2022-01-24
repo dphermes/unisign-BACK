@@ -1,5 +1,6 @@
 package fr.kmcl.unisignBACK;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -10,11 +11,15 @@ import java.io.File;
 import static fr.kmcl.unisignBACK.constant.FileConstant.USER_FOLDER;
 
 @SpringBootApplication
+@Slf4j
 public class UnisignBackApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(UnisignBackApplication.class, args);
-		new File(USER_FOLDER).mkdirs();
+		boolean wasSuccessful = new File(USER_FOLDER).mkdirs();
+		if (!wasSuccessful) {
+			log.error("System failed to create user folders for profile image.");
+		}
 	}
 
 	@Bean
