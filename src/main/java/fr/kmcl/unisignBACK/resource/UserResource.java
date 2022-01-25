@@ -28,8 +28,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -184,6 +187,21 @@ public class UserResource extends ExceptionHandlerGnrl {
     @GetMapping(path = "/image/{username}/{fileName}", produces = IMAGE_JPEG_VALUE)
     public byte[] getProfileImage(@PathVariable("username") String username, @PathVariable("fileName") String fileName) throws IOException {
         return Files.readAllBytes(Paths.get(USER_FOLDER + username + FORWARD_SLASH + fileName));
+    }
+
+    @GetMapping(path = "/image/profile/{username}", produces = IMAGE_JPEG_VALUE)
+    public byte[] getTempProfileImage(@PathVariable("username") String username) throws IOException {
+        URL url = new URL(TEMP_PROFILE_IMAGE_BASE_URL + username);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (InputStream inputStream = url.openStream()) {
+            int bytesRead;
+            // Control the number of byte analyzed at once for performance purpose
+            byte[] chunk = new byte[1024];
+            while ((bytesRead = inputStream.read(chunk)) > 0) {
+                byteArrayOutputStream.write(chunk, 0, bytesRead);
+            }
+        }
+        return byteArrayOutputStream.toByteArray();
     }
 
     private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
