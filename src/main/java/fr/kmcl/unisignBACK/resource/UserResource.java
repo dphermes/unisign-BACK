@@ -35,11 +35,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static fr.kmcl.unisignBACK.constant.EmailConstant.EMAIL_SENT;
 import static fr.kmcl.unisignBACK.constant.SecurityConstant.JWT_TOKEN_HEADER;
+import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -164,8 +163,22 @@ public class UserResource extends ExceptionHandlerGnrl {
         return response(OK, EMAIL_SENT + email);
     }
 
-    private ResponseEntity<HttpResponse> response(HttpStatus ok, String message) {
-        return null;
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('user:delete')")
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") long id) {
+        userService.deleteUser(id);
+        return response(NO_CONTENT, USER_DELETED_SUCCESSFULLY);
+    }
+
+    @PostMapping("/updateProfileImage")
+    public ResponseEntity<AppUser> updateProfileImage(@RequestParam("username") String username,
+                                                      @RequestParam(value = "profileImage") MultipartFile profileImage) throws UserNotFoundException, EmailExistException, IOException, UsernameExistException {
+        AppUser user = userService.updateProfileImage(username, profileImage);
+        return new ResponseEntity<>(user, OK);
+    }
+
+    private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
+        return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(), message), httpStatus);
     }
 
     @PostMapping("/user/save")
