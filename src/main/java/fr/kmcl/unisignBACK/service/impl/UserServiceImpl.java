@@ -14,6 +14,7 @@ import fr.kmcl.unisignBACK.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -370,25 +371,25 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @throws EmailExistException: EmailExistException exception can be thrown
      */
     private AppUser validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistException, EmailExistException {
-        AppUser userByUsername = findUserByUsername(newUsername);
-        AppUser userByEmail = findUserByEmail(newEmail);
-        if (isNotBlank(currentUsername)) {
+        AppUser userByNewUsername = findUserByUsername(newUsername);
+        AppUser userByNewEmail = findUserByEmail(newEmail);
+        if(StringUtils.isNotBlank(currentUsername)) {
             AppUser currentUser = findUserByUsername(currentUsername);
-            if (currentUser == null) {
+            if(currentUser == null) {
                 throw new UserNotFoundException(NO_USER_FOUND_WITH_USERNAME + currentUsername);
             }
-            if (userByUsername != null && currentUser.getId().equals(userByUsername.getId())) {
+            if(userByNewUsername != null && !currentUser.getId().equals(userByNewUsername.getId())) {
                 throw new UsernameExistException(USERNAME_ALREADY_EXISTS);
             }
-            if (userByEmail != null && currentUser.getId().equals(userByEmail.getId())) {
+            if(userByNewEmail != null && !currentUser.getId().equals(userByNewEmail.getId())) {
                 throw new EmailExistException(EMAIL_ALREADY_EXISTS);
             }
             return currentUser;
         } else {
-            if (userByUsername != null) {
+            if(userByNewUsername != null) {
                 throw new UsernameExistException(USERNAME_ALREADY_EXISTS);
             }
-            if (userByEmail != null) {
+            if(userByNewEmail != null) {
                 throw new EmailExistException(EMAIL_ALREADY_EXISTS);
             }
             return null;

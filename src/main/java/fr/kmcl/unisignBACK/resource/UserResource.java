@@ -81,7 +81,7 @@ public class UserResource extends ExceptionHandlerGnrl {
      * @param user AppUser: user to save
      * @return ResponseEntity<AppUser>: a user and a httpStatus
      */
-    @PostMapping("/user/save")
+    @PostMapping("/save")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AppUser> saveUser(@RequestBody AppUser user) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/user/save").toUriString());
@@ -209,7 +209,7 @@ public class UserResource extends ExceptionHandlerGnrl {
      * @throws EmailNotFoundException: EmailNotFoundException exception can be thrown
      * @throws MessagingException: MessagingException exception can be thrown
      */
-    @GetMapping("/resetPassword/{email}")
+    @GetMapping("/reset-password/{email}")
     public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws EmailNotFoundException, MessagingException {
         userService.resetPassword(email);
         return response(OK, EMAIL_SENT + email);
@@ -225,7 +225,7 @@ public class UserResource extends ExceptionHandlerGnrl {
      * @throws IOException: IOException exception can be thrown
      * @throws UsernameExistException: UsernameExistException exception can be thrown
      */
-    @PostMapping("/updateProfileImage")
+    @PostMapping("/update-profile-image")
     public ResponseEntity<AppUser> updateProfileImage(@RequestParam("username") String username,
                                                       @RequestParam(value = "profileImage") MultipartFile profileImage) throws UserNotFoundException, EmailExistException, IOException, UsernameExistException {
         AppUser user = userService.updateProfileImage(username, profileImage);

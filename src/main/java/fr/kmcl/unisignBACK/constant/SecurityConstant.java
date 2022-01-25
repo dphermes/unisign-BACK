@@ -21,6 +21,7 @@ public class SecurityConstant {
             "/api/v1/user/register",
             "/api/v1/user/reset_password/**",
             "/api/v1/user/image/**",
+            "/user/image/**",
             "/api/v1/token/refresh/**"
     };
     // public static final String[] PUBLIC_URLS = {"**"};
