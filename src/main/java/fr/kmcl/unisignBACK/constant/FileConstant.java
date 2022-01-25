@@ -6,7 +6,7 @@ package fr.kmcl.unisignBACK.constant;
  * @since 01/10/2022
  */
 public class FileConstant {
-    public static final String USER_IMAGE_PATH = "/user/image/";
+    public static final String USER_IMAGE_PATH = "/api/v1/user/image/";
     public static final String JPG_EXTENSION = "jpg";
     public static final String USER_FOLDER = System.getProperty("user.home") + "/unisign-BACK/api/v1/user/";
     public static final String DIRECTORY_CREATED = "Created directory for: ";
