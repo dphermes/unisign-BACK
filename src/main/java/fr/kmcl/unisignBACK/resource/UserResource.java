@@ -62,6 +62,11 @@ public class UserResource extends ExceptionHandlerGnrl {
     private AuthenticationManager authenticationManager;
     private JWTTokenProvider jwtTokenProvider;
 
+    /**
+     * Login user
+     * @param user AppUser: user Entity
+     * @return ResponseEntity<AppUser>: return the user with a Jwt, user's info and HttpStatus
+     */
     @PostMapping("/login")
     public ResponseEntity<AppUser> loginUser(@RequestBody AppUser user) {
         authenticate(user.getUsername(), user.getPassword());
@@ -69,6 +74,18 @@ public class UserResource extends ExceptionHandlerGnrl {
         UserPrincipal userPrincipal = new UserPrincipal(loginUser);
         HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
         return new ResponseEntity<>(loginUser, jwtHeader, OK);
+    }
+
+    /**
+     * Save a user in the database
+     * @param user AppUser: user to save
+     * @return ResponseEntity<AppUser>: a user and a httpStatus
+     */
+    @PostMapping("/user/save")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<AppUser> saveUser(@RequestBody AppUser user) {
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/user/save").toUriString());
+        return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
 
     /**
@@ -151,25 +168,11 @@ public class UserResource extends ExceptionHandlerGnrl {
         return new ResponseEntity<>(updatedUser, OK);
     }
 
-    @GetMapping(path = "/find/{username}")
-    public ResponseEntity<AppUser> getUser(@PathVariable("username") String username) {
-        AppUser user = userService.findUserByUsername(username);
-        return new ResponseEntity<>(user, OK);
-    }
-
-    @GetMapping("/all")
-    @PreAuthorize("hasAuthority('user:read')")
-    public ResponseEntity<List<AppUser>> getAllUsers() {
-        List<AppUser> users = userService.getUsers();
-        return new ResponseEntity<>(users, OK);
-    }
-
-    @GetMapping("/resetPassword/{email}")
-    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws EmailNotFoundException, MessagingException {
-        userService.resetPassword(email);
-        return response(OK, EMAIL_SENT + email);
-    }
-
+    /**
+     * Delete a user if we have according authority
+     * @param id long: user's id
+     * @return ResponseEntity<HttpResponse>: httpStatus and message if found
+     */
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('user:delete')")
     public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") long id) {
@@ -177,6 +180,51 @@ public class UserResource extends ExceptionHandlerGnrl {
         return response(NO_CONTENT, USER_DELETED_SUCCESSFULLY);
     }
 
+    /**
+     * Fetch a user by his username
+     * @param username String: user's username
+     * @return ResponseEntity<AppUser>: The user and httpStatus
+     */
+    @GetMapping(path = "/find/{username}")
+    public ResponseEntity<AppUser> getUser(@PathVariable("username") String username) {
+        AppUser user = userService.findUserByUsername(username);
+        return new ResponseEntity<>(user, OK);
+    }
+
+    /**
+     * Fetch all users
+     * @return ResponseEntity<List<AppUser>>: The list of all users and a httpStatus
+     */
+    @GetMapping("/all")
+    @PreAuthorize("hasAuthority('user:read')")
+    public ResponseEntity<List<AppUser>> getAllUsers() {
+        List<AppUser> users = userService.getUsers();
+        return new ResponseEntity<>(users, OK);
+    }
+
+    /**
+     * Reset a user's password
+     * @param email String: user's email
+     * @return ResponseEntity<HttpResponse>: httpStatus and message if found
+     * @throws EmailNotFoundException: EmailNotFoundException exception can be thrown
+     * @throws MessagingException: MessagingException exception can be thrown
+     */
+    @GetMapping("/resetPassword/{email}")
+    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws EmailNotFoundException, MessagingException {
+        userService.resetPassword(email);
+        return response(OK, EMAIL_SENT + email);
+    }
+
+    /**
+     * Update user's profile image
+     * @param username String: user's username
+     * @param profileImage MultipartFile: the new profile Image (JPG)
+     * @return ResponseEntity<AppUser>: The user and a httpStatus
+     * @throws UserNotFoundException: UserNotFoundException exception can be thrown
+     * @throws EmailExistException: EmailExistException exception can be thrown
+     * @throws IOException: IOException exception can be thrown
+     * @throws UsernameExistException: UsernameExistException exception can be thrown
+     */
     @PostMapping("/updateProfileImage")
     public ResponseEntity<AppUser> updateProfileImage(@RequestParam("username") String username,
                                                       @RequestParam(value = "profileImage") MultipartFile profileImage) throws UserNotFoundException, EmailExistException, IOException, UsernameExistException {
@@ -184,11 +232,24 @@ public class UserResource extends ExceptionHandlerGnrl {
         return new ResponseEntity<>(user, OK);
     }
 
+    /**
+     * Fetch a user's profile image
+     * @param username String: user's username
+     * @param fileName String: file name
+     * @return byte[]: Image in bytes
+     * @throws IOException: IOException exception can be thrown
+     */
     @GetMapping(path = "/image/{username}/{fileName}", produces = IMAGE_JPEG_VALUE)
     public byte[] getProfileImage(@PathVariable("username") String username, @PathVariable("fileName") String fileName) throws IOException {
         return Files.readAllBytes(Paths.get(USER_FOLDER + username + FORWARD_SLASH + fileName));
     }
 
+    /**
+     * Fetch a temporary profile image from external API if user doesn't upload his image
+     * @param username String: user's username
+     * @return byte[]: Image in bytes
+     * @throws IOException: IOException exception can be thrown
+     */
     @GetMapping(path = "/image/profile/{username}", produces = IMAGE_JPEG_VALUE)
     public byte[] getTempProfileImage(@PathVariable("username") String username) throws IOException {
         URL url = new URL(TEMP_PROFILE_IMAGE_BASE_URL + username);
@@ -204,15 +265,14 @@ public class UserResource extends ExceptionHandlerGnrl {
         return byteArrayOutputStream.toByteArray();
     }
 
+    /**
+     * Custom method to return a response entity if another method doesn't return anything initially
+     * @param httpStatus HttpStatus: httpStatus
+     * @param message String: message to build a response entity
+     * @return ResponseEntity<HttpResponse>: custom response entity
+     */
     private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
         return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(), message), httpStatus);
-    }
-
-    @PostMapping("/user/save")
-    @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<AppUser> saveUser(@RequestBody AppUser user) {
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/user/save").toUriString());
-        return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
 
     @GetMapping("/token/refresh")
@@ -251,12 +311,22 @@ public class UserResource extends ExceptionHandlerGnrl {
         }
     }
 
+    /**
+     * Builds and sends JWT token headers
+     * @param user UserPrincipal: user
+     * @return HttpHeaders
+     */
     private HttpHeaders getJwtHeader(UserPrincipal user) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(JWT_TOKEN_HEADER, jwtTokenProvider.generateJwtToken(user));
         return headers;
     }
 
+    /**
+     * Authenticate a user
+     * @param username String: user's username
+     * @param password String: user's password
+     */
     private void authenticate(String username, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
