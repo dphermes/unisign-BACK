@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @param newUsername String: user's username to update
      * @param newEmail String: user's email to update
      * @param role String: user's role to update
-     * @param isNotLocked boolean: if user is not locked or is
+     * @param isNotLocked boolean: if user is not locked (true) or is locked (false)
      * @param isActive boolean: if user is active or not
      * @param profileImage MultipartFile: profile image file to update
      * @return AppUser: updated user
