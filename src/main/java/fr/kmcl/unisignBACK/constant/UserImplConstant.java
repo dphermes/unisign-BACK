@@ -12,4 +12,6 @@ public class UserImplConstant {
     public static final String NO_USER_FOUND_WITH_EMAIL = "No user found with email ";
     public static final String USER_FOUND_IN_DB = "User {} found in the database";
     public static final String SAVING_USER_TO_DB = "Saving user {} to the database";
+    public static final String EMAIL_SENT = "An email with a new password was sent to: ";
+    public static final String USER_DELETED_SUCCESSFULLY = "User deleted successfully";
 }
