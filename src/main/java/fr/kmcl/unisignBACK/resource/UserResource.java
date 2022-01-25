@@ -30,15 +30,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static fr.kmcl.unisignBACK.constant.FileConstant.*;
 import static fr.kmcl.unisignBACK.constant.SecurityConstant.JWT_TOKEN_HEADER;
 import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -175,6 +179,11 @@ public class UserResource extends ExceptionHandlerGnrl {
                                                       @RequestParam(value = "profileImage") MultipartFile profileImage) throws UserNotFoundException, EmailExistException, IOException, UsernameExistException {
         AppUser user = userService.updateProfileImage(username, profileImage);
         return new ResponseEntity<>(user, OK);
+    }
+
+    @GetMapping(path = "/image/{username}/{fileName}", produces = IMAGE_JPEG_VALUE)
+    public byte[] getProfileImage(@PathVariable("username") String username, @PathVariable("fileName") String fileName) throws IOException {
+        return Files.readAllBytes(Paths.get(USER_FOLDER + username + FORWARD_SLASH + fileName));
     }
 
     private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
