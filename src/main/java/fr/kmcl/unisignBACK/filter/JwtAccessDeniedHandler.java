@@ -33,7 +33,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
      */
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception) throws IOException {
-        HttpResponse httpResponse = new HttpResponse(UNAUTHORIZED.value(), UNAUTHORIZED, UNAUTHORIZED.getReasonPhrase().toUpperCase(), ACCESS_DENIED_MESSAGE);
+        HttpResponse httpResponse = new HttpResponse(UNAUTHORIZED.value(), UNAUTHORIZED, UNAUTHORIZED.getReasonPhrase(), ACCESS_DENIED_MESSAGE);
         response.setContentType(APPLICATION_JSON_VALUE);
         response.setStatus(UNAUTHORIZED.value());
         // Take the httpServlet response (response) and stream our custom httpResponse object into it

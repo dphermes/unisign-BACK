@@ -167,7 +167,7 @@ public class ExceptionHandlerGnrl implements ErrorController {
      * @return ResponseEntity<> containing our custom httpResponse and status
      */
     private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String message) {
-        HttpResponse httpResponse = new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(), message.toUpperCase());
+        HttpResponse httpResponse = new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase(), message);
         return new ResponseEntity<>(httpResponse, httpStatus);
     }
 
