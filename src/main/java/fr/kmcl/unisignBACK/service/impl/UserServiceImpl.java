@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @param username String: user's username
      * @param email String: user's email
      * @param role String: user's role
-     * @param isNotLocked boolean: if user is not locked or is
+     * @param isNonLocked boolean: if user is not locked or is
      * @param isActive boolean: if user is active or not
      * @param profileImage MultipartFile: profile image file
      * @return AppUser: newly added user
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @throws IOException: IOException exception can be thrown
      */
     @Override
-    public AppUser addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, EmailExistException, UsernameExistException, IOException {
+    public AppUser addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException {
         validateNewUsernameAndEmail(EMPTY, username, email);
         AppUser user = new AppUser();
         String password = generatePassword();
@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setEmail(email);
         user.setPassword(encodePassword(password));
         user.setActive(isActive);
-        user.setNotLocked(isNotLocked);
+        user.setNotLocked(isNonLocked);
         user.setRole(getRoleEnumName(role).name());
         user.setAuthorities(getRoleEnumName(role).getAuthorities());
         user.setProfileImageUrl(getTemporaryProfileUrl(username));

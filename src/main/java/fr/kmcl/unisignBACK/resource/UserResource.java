@@ -112,7 +112,7 @@ public class UserResource extends ExceptionHandlerGnrl {
      * @param email String: new user's username
      * @param role String: new user's role
      * @param isActive String: if user is active (true) or not (false)
-     * @param isNotLocked String: if user is not locked (true) or is locked (false)
+     * @param isNonLocked String: if user is not locked (true) or is locked (false)
      * @param profileImage MultipartFile: new user's profile Image file
      * @return ResponseEntity<AppUser>: a response entity with the new user and the OK http status
      * @throws UserNotFoundException: UserNotFoundException exception can be thrown
@@ -122,16 +122,14 @@ public class UserResource extends ExceptionHandlerGnrl {
      */
     @PostMapping("/add")
     public ResponseEntity<AppUser> addNewUser(@RequestParam("firstName") String firstName,
-                                              @RequestParam("lastName") String lastName,
-                                              @RequestParam("username") String username,
-                                              @RequestParam("email") String email,
-                                              @RequestParam("role") String role,
-                                              @RequestParam("isActive") String isActive,
-                                              @RequestParam("isNotLocked") String isNotLocked,
-                                              @RequestParam(value = "profileImage", required = false) MultipartFile profileImage)
-            throws UserNotFoundException, EmailExistException, IOException, UsernameExistException {
-        AppUser newUser = userService.addNewUser(firstName, lastName, username, email, role,
-                Boolean.parseBoolean(isActive), Boolean.parseBoolean(isNotLocked), profileImage);
+                                           @RequestParam("lastName") String lastName,
+                                           @RequestParam("username") String username,
+                                           @RequestParam("email") String email,
+                                           @RequestParam("role") String role,
+                                           @RequestParam("isActive") String isActive,
+                                           @RequestParam("isNonLocked") String isNonLocked,
+                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException {
+        AppUser newUser = userService.addNewUser(firstName, lastName, username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(newUser, OK);
     }
 
@@ -160,7 +158,7 @@ public class UserResource extends ExceptionHandlerGnrl {
                                               @RequestParam("email") String email,
                                               @RequestParam("role") String role,
                                               @RequestParam("isActive") String isActive,
-                                              @RequestParam("isNotLocked") String isNotLocked,
+                                              @RequestParam("isNonLocked") String isNotLocked,
                                               @RequestParam(value = "profileImage", required = false) MultipartFile profileImage)
             throws UserNotFoundException, EmailExistException, IOException, UsernameExistException {
         AppUser updatedUser = userService.updateUser(currentUsername, firstName, lastName, username, email, role,
