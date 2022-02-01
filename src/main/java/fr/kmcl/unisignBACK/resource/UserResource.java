@@ -177,7 +177,7 @@ public class UserResource extends ExceptionHandlerGnrl {
     @PreAuthorize("hasAuthority('user:delete')")
     public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") long id) {
         userService.deleteUser(id);
-        return response(NO_CONTENT, USER_DELETED_SUCCESSFULLY);
+        return response(OK, USER_DELETED_SUCCESSFULLY);
     }
 
     /**
