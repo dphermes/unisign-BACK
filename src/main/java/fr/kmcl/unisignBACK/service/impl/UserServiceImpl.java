@@ -178,11 +178,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * Delete a user from the database
-     * @param id long: user's id
+     * @param username String: user's username
      */
     @Override
-    public void deleteUser(long id) {
-        userRepo.deleteById(id);
+    public void deleteUser(String username) {
+        AppUser user = userRepo.findAppUserByUsername(username);
+        userRepo.deleteById(user.getId());
     }
 
     /**

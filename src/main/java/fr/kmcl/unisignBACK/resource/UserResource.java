@@ -168,13 +168,13 @@ public class UserResource extends ExceptionHandlerGnrl {
 
     /**
      * Delete a user if we have according authority
-     * @param id long: user's id
+     * @param username String: user's username
      * @return ResponseEntity<HttpResponse>: httpStatus and message if found
      */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{username}")
     @PreAuthorize("hasAuthority('user:delete')")
-    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) {
+        userService.deleteUser(username);
         return response(OK, USER_DELETED_SUCCESSFULLY);
     }
 

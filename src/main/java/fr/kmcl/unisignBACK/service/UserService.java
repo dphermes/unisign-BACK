@@ -21,7 +21,7 @@ public interface UserService {
     AppUser registerUser(String firstName, String lastName, String username, String email) throws UserNotFoundException, EmailExistException, UsernameExistException, MessagingException;
     AppUser addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException;
     AppUser updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, EmailExistException, UsernameExistException, IOException;
-    void deleteUser(long id);
+    void deleteUser(String username);
     AppUser findUserByUsername(String username);
     AppUser findUserByEmail(String email);
     /* Assuming there's not a lot of users using this application
