@@ -173,7 +173,7 @@ public class UserResource extends ExceptionHandlerGnrl {
      */
     @DeleteMapping("/delete/{username}")
     @PreAuthorize("hasAuthority('user:delete')")
-    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) {
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) throws IOException {
         userService.deleteUser(username);
         return response(OK, USER_DELETED_SUCCESSFULLY);
     }
