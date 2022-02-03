@@ -128,7 +128,7 @@ public class UserResource extends ExceptionHandlerGnrl {
                                            @RequestParam("role") String role,
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNonLocked") String isNonLocked,
-                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException {
+                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotImageFileException {
         AppUser newUser = userService.addNewUser(firstName, lastName, username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(newUser, OK);
     }
@@ -160,7 +160,7 @@ public class UserResource extends ExceptionHandlerGnrl {
                                               @RequestParam("isActive") String isActive,
                                               @RequestParam("isNonLocked") String isNotLocked,
                                               @RequestParam(value = "profileImage", required = false) MultipartFile profileImage)
-            throws UserNotFoundException, EmailExistException, IOException, UsernameExistException {
+            throws UserNotFoundException, EmailExistException, IOException, UsernameExistException, NotImageFileException {
         AppUser updatedUser = userService.updateUser(currentUsername, firstName, lastName, username, email, role,
                 Boolean.parseBoolean(isActive), Boolean.parseBoolean(isNotLocked), profileImage);
         return new ResponseEntity<>(updatedUser, OK);
@@ -168,13 +168,13 @@ public class UserResource extends ExceptionHandlerGnrl {
 
     /**
      * Delete a user if we have according authority
-     * @param id long: user's id
+     * @param username String: user's username
      * @return ResponseEntity<HttpResponse>: httpStatus and message if found
      */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{username}")
     @PreAuthorize("hasAuthority('user:delete')")
-    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) throws IOException {
+        userService.deleteUser(username);
         return response(OK, USER_DELETED_SUCCESSFULLY);
     }
 
@@ -225,7 +225,7 @@ public class UserResource extends ExceptionHandlerGnrl {
      */
     @PostMapping("/update-profile-image")
     public ResponseEntity<AppUser> updateProfileImage(@RequestParam("username") String username,
-                                                      @RequestParam(value = "profileImage") MultipartFile profileImage) throws UserNotFoundException, EmailExistException, IOException, UsernameExistException {
+                                                      @RequestParam(value = "profileImage") MultipartFile profileImage) throws UserNotFoundException, EmailExistException, IOException, UsernameExistException, NotImageFileException {
         AppUser user = userService.updateProfileImage(username, profileImage);
         return new ResponseEntity<>(user, OK);
     }
