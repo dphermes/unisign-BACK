@@ -149,6 +149,15 @@ public class ExceptionHandlerGnrl implements ErrorController {
         log.error(exception.getMessage());
         return createHttpResponse(NOT_FOUND, exception.getMessage());
     }
+    /**
+     * Custom Handler for General Not Found Exception
+     * @return ResponseEntity<HttpResponse>
+     */
+    @ExceptionHandler(NotImageFileException.class)
+    public ResponseEntity<HttpResponse> notImageFileException(NotImageFileException exception) {
+        log.error(exception.getMessage());
+        return createHttpResponse(BAD_REQUEST, exception.getMessage());
+    }
 
     /**
      * Custom Handler for IOException

@@ -1,9 +1,6 @@
 package fr.kmcl.unisignBACK.service.impl;
 
-import fr.kmcl.unisignBACK.exception.model.EmailExistException;
-import fr.kmcl.unisignBACK.exception.model.EmailNotFoundException;
-import fr.kmcl.unisignBACK.exception.model.UserNotFoundException;
-import fr.kmcl.unisignBACK.exception.model.UsernameExistException;
+import fr.kmcl.unisignBACK.exception.model.*;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.repo.UserRepo;
 import fr.kmcl.unisignBACK.security.Role;
@@ -33,6 +30,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +39,9 @@ import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
 import static fr.kmcl.unisignBACK.security.Role.ROLE_USER;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
+import static org.springframework.http.MediaType.IMAGE_GIF_VALUE;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -54,12 +54,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Slf4j
 @Qualifier("userDetailsService")
 public class UserServiceImpl implements UserService, UserDetailsService {
-
+    
     private final UserRepo userRepo;
     private final BCryptPasswordEncoder passwordEncoder;
     private LoginAttemptService loginAttemptService;
     private EmailService emailService;
-
 
     /**
      * Save User in the database
@@ -124,7 +123,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @throws IOException: IOException exception can be thrown
      */
     @Override
-    public AppUser addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException {
+    public AppUser addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotImageFileException {
         validateNewUsernameAndEmail(EMPTY, username, email);
         AppUser user = new AppUser();
         String password = generatePassword();
@@ -163,7 +162,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @throws IOException: IOException exception can be thrown
      */
     @Override
-    public AppUser updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, EmailExistException, UsernameExistException, IOException {
+    public AppUser updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, EmailExistException, UsernameExistException, IOException, NotImageFileException {
         AppUser currentUser = validateNewUsernameAndEmail(currentUsername, newUsername, newEmail);
         currentUser.setFirstName(newFirstName);
         currentUser.setLastName(newLastName);
@@ -250,7 +249,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @throws IOException: IOException exception can be thrown
      */
     @Override
-    public AppUser updateProfileImage(String username, MultipartFile newProfileImage) throws UserNotFoundException, EmailExistException, UsernameExistException, IOException {
+    public AppUser updateProfileImage(String username, MultipartFile newProfileImage) throws UserNotFoundException, EmailExistException, UsernameExistException, IOException, NotImageFileException {
         AppUser user = validateNewUsernameAndEmail(username, null, null);
         saveProfileImage(user, newProfileImage);
         return user;
@@ -297,9 +296,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @param profileImage MultipartFile: profile image file
      * @throws IOException: IOException exception can be thrown
      */
-    private void saveProfileImage(AppUser user, MultipartFile profileImage) throws IOException {
+    private void saveProfileImage(AppUser user, MultipartFile profileImage) throws IOException, NotImageFileException {
         String username = user.getUsername();
         if (profileImage != null) {
+            if (!Arrays.asList(IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE, IMAGE_GIF_VALUE).contains(profileImage.getContentType())) {
+                throw new NotImageFileException(profileImage.getOriginalFilename() + ONLY_IMAGES_ALLOWED);
+            }
             Path userFolder = Paths.get(USER_FOLDER + username).toAbsolutePath().normalize();
             if (!Files.exists(userFolder)) {
                 Files.createDirectories(userFolder);
