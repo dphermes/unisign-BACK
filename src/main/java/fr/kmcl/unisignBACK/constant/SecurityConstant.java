@@ -21,6 +21,7 @@ public class SecurityConstant {
             "/api/v1/user/register",
             "/api/v1/user/image/**",
             "/user/image/**",
-            "/api/v1/token/refresh/**"
+            "/api/v1/token/refresh/**",
+            "/api/v1/signature/find/**",
     };
 }
