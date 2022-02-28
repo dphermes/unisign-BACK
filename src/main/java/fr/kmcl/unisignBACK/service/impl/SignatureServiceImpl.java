@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @author KMCL (https://www.kmcl.fr)
  * @version 1.0
@@ -22,5 +24,10 @@ public class SignatureServiceImpl implements SignatureService {
     @Override
     public Signature findSignatureById(Long id) {
         return signatureRepo.findSignatureById(id);
+    }
+
+    @Override
+    public List<Signature> getSignatures() {
+        return signatureRepo.findAll();
     }
 }

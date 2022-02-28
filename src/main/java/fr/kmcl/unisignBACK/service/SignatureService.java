@@ -2,6 +2,8 @@ package fr.kmcl.unisignBACK.service;
 
 import fr.kmcl.unisignBACK.model.Signature;
 
+import java.util.List;
+
 /**
  * @author KMCL (https://www.kmcl.fr)
  * @version 1.0
@@ -9,4 +11,5 @@ import fr.kmcl.unisignBACK.model.Signature;
  */
 public interface SignatureService {
     Signature findSignatureById(Long id);
+    List<Signature> getSignatures();
 }

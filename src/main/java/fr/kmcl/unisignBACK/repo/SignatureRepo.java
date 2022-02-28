@@ -1,7 +1,10 @@
 package fr.kmcl.unisignBACK.repo;
 
 import fr.kmcl.unisignBACK.model.Signature;
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -10,4 +13,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface SignatureRepo extends JpaRepository<Signature, Long> {
     Signature findSignatureById(Long id);
+    List<Signature> findAll();
 }
