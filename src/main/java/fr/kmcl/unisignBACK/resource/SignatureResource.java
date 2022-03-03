@@ -48,7 +48,7 @@ public class SignatureResource {
     }
 
     /**
-     * Update a user in the database
+     * Update a signature in the database
      * @param currentLabel String: new signature label
      * @param isActive boolean: new signature active status
      * @return ResponseEntity<Signature>: a response entity with the new signature and the OK http status

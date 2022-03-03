@@ -113,6 +113,15 @@ public class ExceptionHandlerGnrl implements ErrorController {
     }
 
     /**
+     * Custom Handler for Signature Label already exists Exception
+     * @return ResponseEntity<HttpResponse>
+     */
+    @ExceptionHandler(SignatureLabelExistException.class)
+    public ResponseEntity<HttpResponse> signatureLabelExistException(SignatureLabelExistException exception) {
+        return createHttpResponse(BAD_REQUEST, exception.getMessage());
+    }
+
+    /**
      * Custom Handler for Email Not Found Exception
      * @return ResponseEntity<HttpResponse>
      */
@@ -127,6 +136,15 @@ public class ExceptionHandlerGnrl implements ErrorController {
      */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<HttpResponse> userNotFoundException(UserNotFoundException exception) {
+        return createHttpResponse(BAD_REQUEST, exception.getMessage());
+    }
+
+    /**
+     * Custom Handler for Signature Not Found Exception
+     * @return ResponseEntity<HttpResponse>
+     */
+    @ExceptionHandler(SignatureNotFoundException.class)
+    public ResponseEntity<HttpResponse> labelNotFoundException(SignatureNotFoundException exception) {
         return createHttpResponse(BAD_REQUEST, exception.getMessage());
     }
 

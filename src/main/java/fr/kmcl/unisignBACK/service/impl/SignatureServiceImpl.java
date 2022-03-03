@@ -1,17 +1,23 @@
 package fr.kmcl.unisignBACK.service.impl;
 
+import fr.kmcl.unisignBACK.exception.model.*;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.model.Signature;
 import fr.kmcl.unisignBACK.repo.SignatureRepo;
 import fr.kmcl.unisignBACK.service.SignatureService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+
+import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.NO_SIGNATURE_FOUND_WITH_LABEL;
+import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.SIGNATURE_LABEL_ALREADY_EXISTS;
+import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -57,14 +63,33 @@ public class SignatureServiceImpl implements SignatureService {
     }
 
     @Override
-    public Signature updateSignatureSettings(String currentLabel, String newLabel, boolean isActive) {
-        Signature currentSignature = findSignatureByLabel(currentLabel);
+    public Signature updateSignatureSettings(String currentLabel, String newLabel, boolean isActive) throws SignatureLabelExistException, SignatureNotFoundException {
+        Signature currentSignature = validateSignatureLabel(currentLabel, newLabel);
         currentSignature.setLabel(newLabel);
         currentSignature.setActive(isActive);
         currentSignature.setLastModificationDate(new Date());
         currentSignature.setLastModificationDateDisplay(new Date());
         signatureRepo.save(currentSignature);
         return currentSignature;
+    }
+
+    private Signature validateSignatureLabel(String currentLabel, String newLabel) throws SignatureNotFoundException, SignatureLabelExistException {
+        Signature signatureByNewLabel = findSignatureByLabel(newLabel);
+        if(StringUtils.isNotBlank(currentLabel)) {
+            Signature currentSignature = findSignatureByLabel(currentLabel);
+            if(currentSignature == null) {
+                throw new SignatureNotFoundException(NO_SIGNATURE_FOUND_WITH_LABEL + currentLabel);
+            }
+            if(signatureByNewLabel != null && !currentSignature.getId().equals(signatureByNewLabel.getId())) {
+                throw new SignatureLabelExistException(SIGNATURE_LABEL_ALREADY_EXISTS);
+            }
+            return currentSignature;
+        } else {
+            if(signatureByNewLabel != null) {
+                throw new SignatureLabelExistException(SIGNATURE_LABEL_ALREADY_EXISTS);
+            }
+            return null;
+        }
     }
 
     /**

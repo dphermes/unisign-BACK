@@ -1,5 +1,7 @@
 package fr.kmcl.unisignBACK.service;
 
+import fr.kmcl.unisignBACK.exception.model.SignatureLabelExistException;
+import fr.kmcl.unisignBACK.exception.model.SignatureNotFoundException;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.model.Signature;
 
@@ -16,5 +18,5 @@ public interface SignatureService {
     Signature findSignatureByCreatedByUser(Long id);
     List<Signature> getSignatures();
     Signature addNewSignature(String label, AppUser createdByUser, boolean isActive);
-    Signature updateSignatureSettings(String currentLabel, String label, boolean isActive);
+    Signature updateSignatureSettings(String currentLabel, String label, boolean isActive) throws SignatureLabelExistException, SignatureNotFoundException;
 }
