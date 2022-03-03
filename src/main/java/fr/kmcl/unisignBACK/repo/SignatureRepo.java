@@ -13,5 +13,7 @@ import java.util.List;
  */
 public interface SignatureRepo extends JpaRepository<Signature, Long> {
     Signature findSignatureById(Long id);
+    Signature findSignatureByLabel(String label);
+    Signature findSignatureByCreatedByUser(Long id);
     List<Signature> findAll();
 }

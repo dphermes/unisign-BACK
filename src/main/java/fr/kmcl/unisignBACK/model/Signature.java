@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -24,6 +25,17 @@ public class Signature {
     @Column(nullable = false, updatable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Long id;
+    private String signatureId;
     private String label;
+    private Date lastModificationDate;
+    private Date lastModificationDateDisplay;
+    private Date creationDate;
+    @ManyToOne
+    @JoinColumn(name = "created_by_user_id")
+    private AppUser createdByUser;
+    @ManyToOne
+    @JoinColumn(name = "last_modified_by_user_id")
+    private AppUser lastModifiedByUser;
+    private boolean isActive;
     private String htmlSignature;
 }
