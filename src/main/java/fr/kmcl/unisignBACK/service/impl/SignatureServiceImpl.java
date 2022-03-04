@@ -4,6 +4,7 @@ import fr.kmcl.unisignBACK.exception.model.*;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.model.Signature;
 import fr.kmcl.unisignBACK.repo.SignatureRepo;
+import fr.kmcl.unisignBACK.repo.UserRepo;
 import fr.kmcl.unisignBACK.service.SignatureService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -17,7 +18,7 @@ import java.util.List;
 
 import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.NO_SIGNATURE_FOUND_WITH_LABEL;
 import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.SIGNATURE_LABEL_ALREADY_EXISTS;
-import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -29,10 +30,16 @@ import static fr.kmcl.unisignBACK.constant.UserImplConstant.*;
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class SignatureServiceImpl implements SignatureService {
     private final SignatureRepo signatureRepo;
+    private final UserRepo userRepo;
 
     @Override
     public Signature findSignatureById(Long id) {
         return signatureRepo.findSignatureById(id);
+    }
+
+    @Override
+    public Signature findSignatureBySignatureId(String signatureId) {
+        return signatureRepo.findSignatureBySignatureId(signatureId);
     }
 
     @Override
@@ -51,24 +58,30 @@ public class SignatureServiceImpl implements SignatureService {
     }
 
     @Override
-    public Signature addNewSignature(String label, AppUser createdByUser, boolean isActive) {
+    public Signature addNewSignature(String label, String createdByUser, boolean isActive) throws SignatureLabelExistException, SignatureNotFoundException {
+        validateSignatureLabel(EMPTY, label);
         Signature signature = new Signature();
         signature.setSignatureId(generateSignatureId());
         signature.setLabel(label);
         signature.setCreationDate(new Date());
-        signature.setCreatedByUser(createdByUser);
+        AppUser user = userRepo.findAppUserByUsername(createdByUser);
+        signature.setCreatedByUser(user);
         signature.setActive(isActive);
         signatureRepo.save(signature);
         return signature;
     }
 
     @Override
-    public Signature updateSignatureSettings(String currentLabel, String newLabel, boolean isActive) throws SignatureLabelExistException, SignatureNotFoundException {
+    public Signature updateSignatureSettings(String currentLabel, String newLabel, String updatedByUser, boolean isActive, String htmlSignature) throws SignatureLabelExistException, SignatureNotFoundException {
         Signature currentSignature = validateSignatureLabel(currentLabel, newLabel);
+        assert currentSignature != null;
         currentSignature.setLabel(newLabel);
         currentSignature.setActive(isActive);
+        AppUser user = userRepo.findAppUserByUsername(updatedByUser);
+        currentSignature.setLastModifiedByUser(user);
         currentSignature.setLastModificationDate(new Date());
         currentSignature.setLastModificationDateDisplay(new Date());
+        currentSignature.setHtmlSignature(htmlSignature);
         signatureRepo.save(currentSignature);
         return currentSignature;
     }

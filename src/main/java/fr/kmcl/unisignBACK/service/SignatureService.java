@@ -14,9 +14,10 @@ import java.util.List;
  */
 public interface SignatureService {
     Signature findSignatureById(Long id);
+    Signature findSignatureBySignatureId(String signatureId);
     Signature findSignatureByLabel(String label);
     Signature findSignatureByCreatedByUser(Long id);
     List<Signature> getSignatures();
-    Signature addNewSignature(String label, AppUser createdByUser, boolean isActive);
-    Signature updateSignatureSettings(String currentLabel, String label, boolean isActive) throws SignatureLabelExistException, SignatureNotFoundException;
+    Signature addNewSignature(String label, String createdByUser, boolean isActive) throws SignatureLabelExistException, SignatureNotFoundException;
+    Signature updateSignatureSettings(String currentLabel, String label, String updatedByUser,boolean isActive, String htmlSignature) throws SignatureLabelExistException, SignatureNotFoundException;
 }
