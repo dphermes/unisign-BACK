@@ -13,11 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.NO_SIGNATURE_FOUND_WITH_LABEL;
-import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.SIGNATURE_LABEL_ALREADY_EXISTS;
+import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.*;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
@@ -67,6 +67,7 @@ public class SignatureServiceImpl implements SignatureService {
         AppUser user = userRepo.findAppUserByUsername(createdByUser);
         signature.setCreatedByUser(user);
         signature.setActive(isActive);
+        signature.setHtmlSignature(DEFAULT_HTML_SIGNATURE);
         signatureRepo.save(signature);
         return signature;
     }
@@ -84,6 +85,12 @@ public class SignatureServiceImpl implements SignatureService {
         currentSignature.setHtmlSignature(htmlSignature);
         signatureRepo.save(currentSignature);
         return currentSignature;
+    }
+
+    @Override
+    public void deleteSignature(String signatureId) throws IOException {
+        Signature signature = signatureRepo.findSignatureBySignatureId(signatureId);
+        signatureRepo.deleteById(signature.getId());
     }
 
     private Signature validateSignatureLabel(String currentLabel, String newLabel) throws SignatureNotFoundException, SignatureLabelExistException {

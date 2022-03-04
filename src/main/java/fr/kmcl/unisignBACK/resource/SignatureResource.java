@@ -2,9 +2,11 @@ package fr.kmcl.unisignBACK.resource;
 
 import fr.kmcl.unisignBACK.exception.model.*;
 import fr.kmcl.unisignBACK.model.AppUser;
+import fr.kmcl.unisignBACK.model.HttpResponse;
 import fr.kmcl.unisignBACK.model.Signature;
 import fr.kmcl.unisignBACK.service.SignatureService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.SIGNATURE_DELETED_SUCCESSFULLY;
+import static fr.kmcl.unisignBACK.constant.UserImplConstant.USER_DELETED_SUCCESSFULLY;
 import static org.springframework.http.HttpStatus.OK;
 
 /**
@@ -62,6 +66,7 @@ public class SignatureResource {
      * @throws SignatureNotFoundException : SignatureNotFoundException exception can be thrown
      */
     @PostMapping("/update")
+    @PreAuthorize("hasAuthority('signature:update')")
     public ResponseEntity<Signature> updateSignatureSettings(@RequestParam("currentLabel") String currentLabel,
                                                              @RequestParam("label") String label,
                                                              @RequestParam("userName") String userName,
@@ -70,5 +75,27 @@ public class SignatureResource {
             throws SignatureLabelExistException, SignatureNotFoundException {
         Signature updatedSignature = signatureService.updateSignatureSettings(currentLabel, label, userName, Boolean.parseBoolean(isActive), htmlSignature);
         return new ResponseEntity<>(updatedSignature, OK);
+    }
+
+    /**
+     * Delete a signature if we have according authority
+     * @param signatureId String: user's username
+     * @return ResponseEntity<HttpResponse>: httpStatus and message if found
+     */
+    @DeleteMapping("/delete/{signatureId}")
+    @PreAuthorize("hasAuthority('signature:delete')")
+    public ResponseEntity<HttpResponse> deleteSignature(@PathVariable("signatureId") String signatureId) throws IOException {
+        signatureService.deleteSignature(signatureId);
+        return response(OK, SIGNATURE_DELETED_SUCCESSFULLY);
+    }
+
+    /**
+     * Custom method to return a response entity if another method doesn't return anything initially
+     * @param httpStatus HttpStatus: httpStatus
+     * @param message String: message to build a response entity
+     * @return ResponseEntity<HttpResponse>: custom response entity
+     */
+    private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
+        return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase(), message), httpStatus);
     }
 }
