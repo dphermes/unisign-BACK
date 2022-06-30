@@ -68,7 +68,8 @@ public class JWTTokenProvider {
      * @return Authentication: auth token
      */
     public Authentication getAuthentication(String username, List<GrantedAuthority> authorities, HttpServletRequest request) {
-        UsernamePasswordAuthenticationToken userPwdAuthToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
+        UsernamePasswordAuthenticationToken userPwdAuthToken =
+                new UsernamePasswordAuthenticationToken(username, null, authorities);
         userPwdAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         return userPwdAuthToken;
     }

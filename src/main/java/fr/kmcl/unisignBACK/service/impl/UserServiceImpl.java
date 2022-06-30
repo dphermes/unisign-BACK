@@ -1,7 +1,9 @@
 package fr.kmcl.unisignBACK.service.impl;
 
 import fr.kmcl.unisignBACK.exception.model.*;
+import fr.kmcl.unisignBACK.model.Agency;
 import fr.kmcl.unisignBACK.model.AppUser;
+import fr.kmcl.unisignBACK.repo.AgencyRepo;
 import fr.kmcl.unisignBACK.repo.UserRepo;
 import fr.kmcl.unisignBACK.security.Role;
 import fr.kmcl.unisignBACK.security.UserPrincipal;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.hibernate.annotations.common.util.impl.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -56,6 +59,7 @@ import static org.springframework.http.MediaType.IMAGE_GIF_VALUE;
 public class UserServiceImpl implements UserService, UserDetailsService {
     
     private final UserRepo userRepo;
+    private final AgencyRepo agencyRepo;
     private final BCryptPasswordEncoder passwordEncoder;
     private LoginAttemptService loginAttemptService;
     private EmailService emailService;
@@ -123,7 +127,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @throws IOException: IOException exception can be thrown
      */
     @Override
-    public AppUser addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotImageFileException {
+    public AppUser addNewUser(String firstName, String lastName, String username, String email, String agencyLabel, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotImageFileException {
         validateNewUsernameAndEmail(EMPTY, username, email);
         AppUser user = new AppUser();
         String password = generatePassword();
@@ -141,40 +145,50 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setProfileImageUrl(getTemporaryProfileUrl(username));
         userRepo.save(user);
         saveProfileImage(user, profileImage);
-        return user;
+
+        AppUser user1 = userRepo.findAppUserByUsername(username);
+        Agency agency = agencyRepo.findAgencyByLabel(agencyLabel);
+        user1.setAgency(agency);
+        this.addAgencyToUser(agency.getId(), user1.getId());
+        userRepo.save(user1);
+
+        return user1;
     }
 
     /**
-     * Update User in the database
-     * @param currentUsername String: user's current username
-     * @param newFirstName String: user's first name to update
-     * @param newLastName String: user's last name to update
-     * @param newUsername String: user's username to update
-     * @param newEmail String: user's email to update
-     * @param role String: user's role to update
-     * @param isNotLocked boolean: if user is not locked (true) or is locked (false)
-     * @param isActive boolean: if user is active or not
-     * @param profileImage MultipartFile: profile image file to update
-     * @return AppUser: updated user
-     * @throws UserNotFoundException: UserNotFoundException exception can be thrown
-     * @throws EmailExistException: EmailExistException exception can be thrown
-     * @throws UsernameExistException: UsernameExistException exception can be thrown
-     * @throws IOException: IOException exception can be thrown
+     *
+     * @param user
+     * @return
+     * @throws UserNotFoundException
+     * @throws EmailExistException
+     * @throws UsernameExistException
+     * @throws IOException
+     * @throws NotImageFileException
      */
     @Override
-    public AppUser updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, EmailExistException, UsernameExistException, IOException, NotImageFileException {
-        AppUser currentUser = validateNewUsernameAndEmail(currentUsername, newUsername, newEmail);
-        currentUser.setFirstName(newFirstName);
-        currentUser.setLastName(newLastName);
-        currentUser.setUsername(newUsername);
-        currentUser.setEmail(newEmail);
-        currentUser.setActive(isActive);
-        currentUser.setNotLocked(isNotLocked);
-        currentUser.setRole(getRoleEnumName(role).name());
-        currentUser.setAuthorities(getRoleEnumName(role).getAuthorities());
+    public AppUser updateUser(AppUser user) throws UserNotFoundException, EmailExistException, UsernameExistException, IOException, NotImageFileException {
+        AppUser currentUser = validateNewUsernameAndEmail(user.getUsername(), user.getUsername(), user.getEmail());
+        currentUser.setFirstName(user.getFirstName());
+        currentUser.setLastName(user.getLastName());
+        currentUser.setUsername(user.getUsername());
+        currentUser.setEmail(user.getEmail());
+        Agency agency = agencyRepo.findAgencyByLabel(user.getAgency().getLabel());
+        currentUser.setAgency(agency);
+        // this.addAgencyToUser(agency.getId(), currentUser.getId());
+        currentUser.setActive(user.isActive());
+        currentUser.setNotLocked(user.isNotLocked());
+        currentUser.setRole(user.getRole());
+        currentUser.setAuthorities(user.getAuthorities());
         userRepo.save(currentUser);
-        saveProfileImage(currentUser, profileImage);
+        // saveProfileImage(currentUser, profileImage);
         return currentUser;
+    }
+
+    public AppUser addAgencyToUser(Long agencyId, Long userId) {
+        AppUser user = userRepo.findById(userId).get();
+        Agency agency = agencyRepo.findById(agencyId).get();
+        user.enrollEmployee(agency);
+        return userRepo.save(user);
     }
 
     /**

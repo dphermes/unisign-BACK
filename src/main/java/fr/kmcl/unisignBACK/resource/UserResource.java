@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.kmcl.unisignBACK.exception.model.*;
+import fr.kmcl.unisignBACK.model.Agency;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.model.HttpResponse;
 import fr.kmcl.unisignBACK.security.UserPrincipal;
@@ -125,44 +126,29 @@ public class UserResource extends ExceptionHandlerGnrl {
                                            @RequestParam("lastName") String lastName,
                                            @RequestParam("username") String username,
                                            @RequestParam("email") String email,
+                                           @RequestParam("agencyLabel") String agencyLabel,
                                            @RequestParam("role") String role,
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNonLocked") String isNonLocked,
                                            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotImageFileException {
-        AppUser newUser = userService.addNewUser(firstName, lastName, username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
+        AppUser newUser = userService.addNewUser(firstName, lastName, username, email, agencyLabel, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(newUser, OK);
     }
 
     /**
-     * Update a user in the database
-     * @param currentUsername String: new user's current username
-     * @param firstName String: new user's first name
-     * @param lastName String: new user's last name
-     * @param username String: new user's username
-     * @param email String: new user's username
-     * @param role String: new user's role
-     * @param isActive String: if user is active (true) or not (false)
-     * @param isNotLocked String: if user is not locked (true) or is locked (false)
-     * @param profileImage MultipartFile: new user's profile Image file
-     * @return ResponseEntity<AppUser>: a response entity with the new user and the OK http status
-     * @throws UserNotFoundException: UserNotFoundException exception can be thrown
-     * @throws EmailExistException: EmailExistException exception can be thrown
-     * @throws IOException: IOException exception can be thrown exception can be thrown
-     * @throws UsernameExistException: UsernameExistException exception can be thrown
+     *
+     * @param user
+     * @return
+     * @throws UserNotFoundException
+     * @throws EmailExistException
+     * @throws IOException
+     * @throws UsernameExistException
+     * @throws NotImageFileException
      */
     @PostMapping("/update")
-    public ResponseEntity<AppUser> updateUser(@RequestParam("currentUsername") String currentUsername,
-                                              @RequestParam("firstName") String firstName,
-                                              @RequestParam("lastName") String lastName,
-                                              @RequestParam("username") String username,
-                                              @RequestParam("email") String email,
-                                              @RequestParam("role") String role,
-                                              @RequestParam("isActive") String isActive,
-                                              @RequestParam("isNonLocked") String isNotLocked,
-                                              @RequestParam(value = "profileImage", required = false) MultipartFile profileImage)
+    public ResponseEntity<AppUser> updateUser(@RequestBody AppUser user)
             throws UserNotFoundException, EmailExistException, IOException, UsernameExistException, NotImageFileException {
-        AppUser updatedUser = userService.updateUser(currentUsername, firstName, lastName, username, email, role,
-                Boolean.parseBoolean(isActive), Boolean.parseBoolean(isNotLocked), profileImage);
+        AppUser updatedUser = userService.updateUser(user);
         return new ResponseEntity<>(updatedUser, OK);
     }
 
