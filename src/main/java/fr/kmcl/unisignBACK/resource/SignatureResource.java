@@ -1,11 +1,16 @@
 package fr.kmcl.unisignBACK.resource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.kmcl.unisignBACK.exception.model.*;
+import fr.kmcl.unisignBACK.model.Agency;
 import fr.kmcl.unisignBACK.model.AppUser;
 import fr.kmcl.unisignBACK.model.HttpResponse;
 import fr.kmcl.unisignBACK.model.Signature;
 import fr.kmcl.unisignBACK.service.SignatureService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.jar.asm.TypeReference;
+import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,9 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static fr.kmcl.unisignBACK.constant.SignatureImplConstant.SIGNATURE_DELETED_SUCCESSFULLY;
+import static fr.kmcl.unisignBACK.constant.UserImplConstant.SAVING_USER_TO_DB;
 import static fr.kmcl.unisignBACK.constant.UserImplConstant.USER_DELETED_SUCCESSFULLY;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -27,6 +34,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 @RequestMapping(path = {"/api/v1/signature"})
 @AllArgsConstructor
+@Slf4j
 public class SignatureResource {
 
     private final SignatureService signatureService;
@@ -51,8 +59,9 @@ public class SignatureResource {
     @PostMapping("/add")
     public ResponseEntity<Signature> addNewSignature(@RequestParam("label") String label,
                                                      @RequestParam("userName") String userName,
-                                                      @RequestParam("isActive") String isActive) throws SignatureLabelExistException, SignatureNotFoundException {
-        Signature newSignature = signatureService.addNewSignature(label, userName, Boolean.parseBoolean(isActive));
+                                                     @RequestParam("isActive") String isActive,
+                                                     @RequestParam("applyToAgencies") String agencies) throws SignatureLabelExistException, SignatureNotFoundException {
+        Signature newSignature = signatureService.addNewSignature(label, userName, Boolean.parseBoolean(isActive), agencies);
         return new ResponseEntity<>(newSignature, OK);
     }
 
@@ -71,9 +80,10 @@ public class SignatureResource {
                                                              @RequestParam("label") String label,
                                                              @RequestParam("userName") String userName,
                                                              @RequestParam("isActive") String isActive,
-                                                             @RequestParam("htmlSignature") String htmlSignature)
+                                                             @RequestParam("htmlSignature") String htmlSignature,
+                                                             @RequestParam("agencies") List<Agency> agencies)
             throws SignatureLabelExistException, SignatureNotFoundException {
-        Signature updatedSignature = signatureService.updateSignatureSettings(currentLabel, label, userName, Boolean.parseBoolean(isActive), htmlSignature);
+        Signature updatedSignature = signatureService.updateSignatureSettings(currentLabel, label, userName, Boolean.parseBoolean(isActive), htmlSignature, agencies);
         return new ResponseEntity<>(updatedSignature, OK);
     }
 

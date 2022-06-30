@@ -15,5 +15,6 @@ public interface SignatureRepo extends JpaRepository<Signature, Long> {
     Signature findSignatureBySignatureId(String signatureId);
     Signature findSignatureByLabel(String label);
     Signature findSignatureByCreatedByUser(Long id);
+    List<Signature> findSignaturesByApplyToAgenciesId(Long id);
     List<Signature> findAll();
 }

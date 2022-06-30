@@ -23,5 +23,6 @@ public class SecurityConstant {
             "/user/image/**",
             "/api/v1/token/refresh/**",
             "/api/v1/signature/find/**",
+            "/api/v1/signature-version/find/**",
     };
 }

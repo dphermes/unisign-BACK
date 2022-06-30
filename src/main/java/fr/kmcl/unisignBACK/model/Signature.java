@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -30,12 +33,38 @@ public class Signature {
     private Date lastModificationDate;
     private Date lastModificationDateDisplay;
     private Date creationDate;
-    @ManyToOne
-    @JoinColumn(name = "created_by_user_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name="signature_created_by_user_id")
     private AppUser createdByUser;
-    @ManyToOne
-    @JoinColumn(name = "last_modified_by_user_id")
-    private AppUser lastModifiedByUser;
+    @ManyToOne(optional = true)
+    @JoinColumn(name="signature_modified_by_user_id")
+    private AppUser modifiedByUser;
     private boolean isActive;
-    private String htmlSignature;
+    private String status;
+    @ManyToMany(targetEntity = Agency.class,
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            })
+    @JoinTable(name = "signature_agency",
+            joinColumns = { @JoinColumn(name = "signature_id") },
+            inverseJoinColumns = { @JoinColumn(name = "agency_id") })
+    private Set<Agency> applyToAgencies = new HashSet<>();
+    @OneToMany(targetEntity = SignatureVersion.class, cascade = CascadeType.ALL)
+    @JoinTable(
+            name="signature_signature_versions",
+            joinColumns = @JoinColumn(name = "signature_id"),
+            inverseJoinColumns = @JoinColumn(name="signature_versions_id")
+    )
+    private Set<SignatureVersion> signatureVersions;
+    @OneToOne
+    private SignatureVersion activeSignatureVersion;
+
+    public void addSignatureVersion(SignatureVersion signatureVersion) {
+        this.signatureVersions = signatureVersions;
+    }
+
+    public void setApplyToAgency(Agency foundAgency) {
+    }
 }

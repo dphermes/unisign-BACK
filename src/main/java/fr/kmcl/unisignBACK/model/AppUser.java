@@ -1,11 +1,16 @@
 package fr.kmcl.unisignBACK.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author KMCL (https://www.kmcl.fr)
@@ -31,6 +36,13 @@ public class AppUser implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String profileImageUrl;
+    @JsonBackReference
+    @ManyToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name="agency_id")
+    private Agency agency;
+    @JsonIgnore
+    @OneToMany(mappedBy = "recipient")
+    private Set<Notification> notifications;
     private Date lastLoginDate;
     private Date lastLoginDateDisplay;
     private Date joinDate;
@@ -38,5 +50,9 @@ public class AppUser implements Serializable {
     private String[] authorities;
     private boolean isActive;
     private boolean isNotLocked;
+
+    public void enrollEmployee(Agency agency) {
+        this.agency = agency;
+    }
 }
 
